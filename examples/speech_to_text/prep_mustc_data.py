@@ -52,7 +52,7 @@ class MUSTC(Dataset):
 
     def __init__(self, root: str, lang: str, split: str) -> None:
         assert split in self.SPLITS and lang in self.LANGUAGES
-        _root = Path(root) / f"en-{lang}" / "data" / split
+        _root = Path(root) / f"must-c-en-{lang}" / "data" / split
         wav_root, txt_root = _root / "wav", _root / "txt"
         assert _root.is_dir() and wav_root.is_dir() and txt_root.is_dir()
         # Load audio segments
