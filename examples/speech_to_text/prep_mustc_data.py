@@ -47,7 +47,7 @@ class MUSTC(Dataset):
     utterance_id
     """
 
-    SPLITS = ["train", "dev"]
+    SPLITS = ["train", "dev","tst-HE","tst-COMMON"]
     LANGUAGES = ["de", "es", "fr", "it", "nl", "pt", "ro", "ru","ar","cs"]
 
     def __init__(self, root: str, lang: str, split: str) -> None:
