@@ -47,14 +47,14 @@ class mTEDx(Dataset):
     target utterance, speaker_id, utterance_id
     """
 
-    SPLITS = ["train", "valid", "test"]
-    LANGPAIRS = ["es-es", "fr-fr", "pt-pt", "it-it", "ru-ru", "el-el", "ar-ar",
+    SPLITS = ["train"]
+    LANGPAIRS = ["sk-sk", "fr-fr", "pt-pt", "it-it", "ru-ru", "el-el", "ar-ar",
                  "de-de", "es-en", "es-fr", "es-pt", "es-it", "fr-en", "fr-es",
                  "fr-pt", "pt-en", "pt-es", "it-en", "it-es", "ru-en", "el-en"]
 
     def __init__(self, root: str, lang: str, split: str) -> None:
         assert split in self.SPLITS and lang in self.LANGPAIRS
-        _root = Path(root) / f"{lang}" / "data" / split
+        _root = Path(root) /"sk-sk"/ split
         wav_root, txt_root = _root / "wav", _root / "txt"
         assert _root.is_dir() and wav_root.is_dir() and txt_root.is_dir()
         # Load audio segments
@@ -76,19 +76,16 @@ class mTEDx(Dataset):
                 segments[i][_lang] = u
         # Gather info
         self.data = []
-        for wav_filename, _seg_group in groupby(segments, lambda x: x["wav"]):
+        for wav_filename, seg_group in groupby(segments, lambda x: x["wav"]):
             wav_filename = wav_filename.replace(".wav", ".flac")
             wav_path = wav_root / wav_filename
             sample_rate = sf.info(wav_path.as_posix()).samplerate
-            seg_group = sorted(_seg_group, key=lambda x: float(x["offset"]))
             for i, segment in enumerate(seg_group):
-                offset = int(float(segment["offset"]) * sample_rate)
                 n_frames = int(float(segment["duration"]) * sample_rate)
                 _id = f"{wav_path.stem}_{i}"
                 self.data.append(
                     (
                         wav_path.as_posix(),
-                        offset,
                         n_frames,
                         sample_rate,
                         segment[src],
@@ -102,9 +99,9 @@ class mTEDx(Dataset):
     def __getitem__(
             self, n: int
     ) -> Tuple[torch.Tensor, int, str, str, str, str, str]:
-        wav_path, offset, n_frames, sr, src_utt, tgt_utt, spk_id, tgt_lang, \
+        wav_path, n_frames, sr, src_utt, tgt_utt, spk_id, tgt_lang, \
             utt_id = self.data[n]
-        waveform, _ = get_waveform(wav_path, frames=n_frames, start=offset)
+        waveform, _ = get_waveform(wav_path, frames=n_frames)
         waveform = torch.from_numpy(waveform)
         return waveform, sr, src_utt, tgt_utt, spk_id, tgt_lang, utt_id
 
